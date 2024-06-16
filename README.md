@@ -2,6 +2,14 @@
 
 Optimize data creation by synchronizing and caching
 
+- Check cached object 
+  - If valid cache exist, return cached value (hitA)
+- Synchronize execution
+  - Check cached object
+      - If valid cache exist, return cached value (hitS)
+  - Call provider to update cached value
+  - return cached value (miss)
+
 # How to install
 
 ```shell

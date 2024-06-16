@@ -26,7 +26,6 @@ export class CachedProvider<T> extends CachedLazyProvider<T> {
             try {
                 await this.update()
             } catch (e) {
-                // Ignore Errors in Eager Update
                 if (onError) {
                     onError(e)
                 }
