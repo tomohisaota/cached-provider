@@ -1,6 +1,6 @@
 {
   "name": "cached-provider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Optimize data creation by synchronizing and caching",
   "scripts": {
     "build": "npx tsup ./src"

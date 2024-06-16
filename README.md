@@ -13,7 +13,7 @@ Optimize data creation by synchronizing and caching
 # How to install
 
 ```shell
-npm install cacheable-request
+npm install cached-provider
 ```
 
 # How to use
@@ -125,6 +125,8 @@ export type CacheEventCallback = (event: CacheEvent) => void
 | miss | Cache miss, updated value. Slow              |
 
 # Version History
+- 1.0.2
+  - Update README(typo)
 - 1.0.1
   - Update README
 - 1.0.0
