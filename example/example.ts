@@ -90,5 +90,48 @@ async function runner(args: {
     console.table(s.asTable)
 }
 
+// async function docSamples() {
+//     {
+//         const value = cached({
+//             ttl: 1000 * 60,// Cache TTL for get
+//             provider: async () => "slow data provider"
+//         })
+//         await value() // Access Value
+//     }
+//     {
+//         const value = cached({
+//             ttl: 1000 * 60,// Cache TTL for get
+//             provider: async () => "slow data provider",
+//             autoUpdater: {
+//                 interval: 1000 * 5, // Validate cache every 5 sec
+//                 ttl: 1000 * 50, // Cache TTL for update , which should be smaller than TTL for get
+//             }
+//         })
+//         await value() // Access Value
+//     }
+//     {
+//         const value = cached({
+//             ttl: 1000 * 60 * 60,
+//             provider: async () => "slow data provider",
+//             autoUpdater: {
+//                 interval: 1000 * 5, // Validate cache every 5 sec
+//                 ttl: ({lastAccessed}) => {
+//                     // Cache TTL for update , which should be smaller than TTL for get
+//                     // Use longer update cycle when the value is not accessed
+//                     const shortTTL = 1000 * 50
+//                     const longTTL = 1000 * 60 * 59
+//                     if (!lastAccessed) {
+//                         return longTTL
+//                     }
+//                     const timeFromLastAccess = new Date().getTime() - lastAccessed.getTime()
+//                     const isActive = timeFromLastAccess < 1000 * 60 * 10
+//                     return isActive ? shortTTL : longTTL
+//                 }
+//             }
+//         })
+//         await value() // Access Value
+//     }
+// }
+
 main()
 
