@@ -1,9 +1,9 @@
 {
   "name": "cached-provider",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "description": "Optimize data creation by synchronizing and caching",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tsup ./src"
   },
   "author": "Tomohisa Ota",
   "license": "MIT",
