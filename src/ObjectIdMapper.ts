@@ -1,6 +1,11 @@
 type IdGenerator = (obj: Object) => string
 type IdDecorator = (obj: Object, uniqueId: string) => string
 
+/*
+Assign Unique ID to JavaScript Object
+WeakMap will keep the key as long as the Object is alive
+ */
+
 export class ObjectIdMapper {
     readonly idGenerator: IdGenerator
     readonly idDecorator: IdDecorator

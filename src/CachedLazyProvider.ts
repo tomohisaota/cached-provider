@@ -1,16 +1,18 @@
 import {synchronized} from "./synchronized";
 import {CachedProviderOptions, EventType, MethodType} from "./types";
 
+type Holder<T> = {
+    readonly cachedObj: T
+    readonly cachedAt: Date
+}
+
 export class CachedLazyProvider<T> {
 
     readonly options: CachedProviderOptions<T> & Required<Pick<CachedProviderOptions<T>, "onEvent">>
 
-    cacheHolder?: {
-        readonly obj: T
-        readonly cachedAt: Date
-    }
+    cacheHolder?: Holder<T>
 
-    lastAccessed?: Date
+    accessedAt?: Date
 
     constructor(options: CachedProviderOptions<T>) {
         this.options = {
@@ -22,7 +24,7 @@ export class CachedLazyProvider<T> {
 
     async get(): Promise<T> {
         const o = this._getOrUpdateThenEmit("get")
-        this.lastAccessed = new Date()
+        this.accessedAt = new Date()
         return o
     }
 
@@ -30,55 +32,61 @@ export class CachedLazyProvider<T> {
         await this._getOrUpdateThenEmit("update")
     }
 
-    private _timeToLive(type: MethodType): number {
+    private _timeToLive(type: MethodType, holder: Holder<T>): number {
         const ttl = type === "get"
             ? this.options.ttl
             : (this.options.autoUpdater?.ttl ?? this.options.ttl)
-        return typeof ttl === 'number'
-            ? ttl
-            : ttl({
-                lastAccessed: this.lastAccessed,
-                lastUpdated: this.cacheHolder?.cachedAt
-            })
-    }
-
-    private _timeUntilExpire(type: MethodType): number {
-        const lastUpdated = this.cacheHolder?.cachedAt
-        if (lastUpdated === undefined) {
-            return -1
+        if (typeof ttl === 'number') {
+            return ttl
         }
-        const elapsed = new Date().getTime() - lastUpdated.getTime()
-        return this._timeToLive(type) - elapsed
+        const now = new Date().getTime()
+        const {accessedAt} = this
+        return ttl({
+            ...holder,
+            accessedAt,
+            //
+            now,
+            sinceCachedAt: now - holder.cachedAt.getTime(),
+            sinceAccessedAt: accessedAt
+                ? now - accessedAt.getTime()
+                : undefined
+        })
     }
 
-    private _isExpired(type: MethodType): boolean {
-        return this._timeUntilExpire(type) <= 0
+    private _timeUntilExpire(type: MethodType, holder: Holder<T>): number {
+        const elapsed = new Date().getTime() - holder.cachedAt.getTime()
+        return this._timeToLive(type, holder) - elapsed
+    }
+
+    private _isExpired(type: MethodType, holder: Holder<T>): boolean {
+        return this._timeUntilExpire(type, holder) <= 0
     }
 
     private async _getOrUpdateThenEmit(methodType: MethodType): Promise<T> {
         const requestAt = new Date()
         const eventType = await this._getOrUpdate(methodType)
         const responseAt = new Date()
-        const {obj, cachedAt} = this.cacheHolder!
+        const {accessedAt} = this
+        const {cachedObj, cachedAt} = this.cacheHolder!
         this.options.onEvent({
-            eventType, methodType,
-            requestAt, responseAt, cachedAt
+            cachedObj, cachedAt, accessedAt: accessedAt,
+            eventType, methodType, requestAt, responseAt,
         })
-        return obj
+        return cachedObj
     }
 
     private async _getOrUpdate(type: MethodType): Promise<EventType> {
-        if (!this._isExpired(type) && this.cacheHolder) {
+        if (this.cacheHolder && !this._isExpired(type, this.cacheHolder)) {
             return "hitA"
         }
         return synchronized(this)(
             async () => {
-                if (!this._isExpired(type) && this.cacheHolder) {
+                if (this.cacheHolder && !this._isExpired(type, this.cacheHolder)) {
                     return "hitS"
                 }
                 // Update Cache
                 this.cacheHolder = {
-                    obj: await this.options.provider(),
+                    cachedObj: await this.options.provider(),
                     cachedAt: new Date()
                 }
                 return "miss"

@@ -20,7 +20,7 @@ export class StatisticsCollector {
         "update": {},
     }
 
-    collect({methodType, eventType, requestAt, responseAt}: CacheEvent) {
+    collect<T>({methodType, eventType, requestAt, responseAt}: CacheEvent<T>) {
         const s = this._stats[methodType][eventType]
         const latency = responseAt.getTime() - requestAt.getTime()
         if (!s) {

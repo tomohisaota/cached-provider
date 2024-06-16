@@ -1,4 +1,6 @@
-import {CacheEvent} from "./types";
+/*
+Serialize promise execution by creating promise chain for given string key
+ */
 
 type Ref = {
     readonly p: Promise<void>
@@ -6,6 +8,7 @@ type Ref = {
 }
 
 export class Synchronizer {
+    // Hold promise chain for given key
     private readonly holders: { [key: string]: Ref } = {}
 
     async synchronized<T>(

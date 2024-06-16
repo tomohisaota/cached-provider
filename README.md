@@ -48,17 +48,12 @@ const value = cached({
     provider: async () => "slow data provider",
     autoUpdater: {
         interval: 1000 * 5, // Validate cache every 5 sec
-        ttl: ({lastAccessed}) => {
+        ttl: ({sinceAccessedAt}) => {
             // Cache TTL for update , which should be smaller than TTL for get
             // Use longer update cycle when the value is not accessed
-            const shortTTL = 1000 * 50
-            const longTTL = 1000 * 60 * 59
-            if (!lastAccessed) {
-                return longTTL
-            }
-            const timeFromLastAccess = new Date().getTime() - lastAccessed.getTime()
-            const isActive = timeFromLastAccess < 1000 * 60 * 10
-            return isActive ? shortTTL : longTTL
+            return (sinceAccessedAt !== undefined) && (sinceAccessedAt < 1000 * 60 * 10)
+                ? 1000 * 50
+                : 1000 * 60 * 59
         }
     }
 })
