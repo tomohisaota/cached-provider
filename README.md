@@ -13,8 +13,7 @@ Optimize data creation by synchronizing and caching
 # How to install
 
 ```shell
-# Not released yet!!
-# npm install cacheable-request
+npm install cacheable-request
 ```
 
 # How to use
@@ -124,6 +123,12 @@ export type CacheEventCallback = (event: CacheEvent) => void
 | hitA | Cache hit before synchronization. Super fast |
 | hitS | Cache hit after synchronization. Fast        |
 | miss | Cache miss, updated value. Slow              |
+
+# Version History
+- 1.0.1
+  - Update README
+- 1.0.0
+  - Initial Release
 
 # License
 
