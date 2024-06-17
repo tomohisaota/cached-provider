@@ -3,11 +3,15 @@
   "version": "1.0.2",
   "description": "Optimize data creation by synchronizing and caching",
   "scripts": {
-    "build": "npx tsup ./src"
+    "build": "npx tsup ./src",
+    "test": "jest"
   },
   "author": "Tomohisa Ota",
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"

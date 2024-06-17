@@ -12,16 +12,15 @@ export class ObjectIdMapper {
 
     protected readonly idMap = new WeakMap<WeakKey, string>();
 
-    constructor(
-        {idGenerator, idDecorator}: {
-            idGenerator?: IdGenerator,
-            idDecorator?: IdDecorator,
-        }
+    constructor(args?: {
+                    idGenerator?: IdGenerator,
+                    idDecorator?: IdDecorator,
+                }
     ) {
-        this.idGenerator = idGenerator ?? (() => {
+        this.idGenerator = args?.idGenerator ?? (() => {
             return crypto.randomUUID()
         })
-        this.idDecorator = idDecorator ?? ((_: Object, uniqueId: string) => {
+        this.idDecorator = args?.idDecorator ?? ((_: Object, uniqueId: string) => {
             return uniqueId
         })
     }

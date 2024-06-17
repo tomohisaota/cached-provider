@@ -1,5 +1,5 @@
 import {synchronized} from "./synchronized";
-import {CachedProviderOptions, EventType, MethodType} from "./types";
+import {CachedProviderOptions, EventType, MethodType, TTLProvider} from "./types";
 
 type Holder<T> = {
     readonly cachedObj: T
@@ -23,43 +23,12 @@ export class CachedLazyProvider<T> {
     }
 
     async get(): Promise<T> {
-        const o = this._getOrUpdateThenEmit("get")
         this.accessedAt = new Date()
-        return o
+        return this._getOrUpdateThenEmit("get")
     }
 
     async update(): Promise<void> {
         await this._getOrUpdateThenEmit("update")
-    }
-
-    private _timeToLive(type: MethodType, holder: Holder<T>): number {
-        const ttl = type === "get"
-            ? this.options.ttl
-            : (this.options.autoUpdater?.ttl ?? this.options.ttl)
-        if (typeof ttl === 'number') {
-            return ttl
-        }
-        const now = new Date().getTime()
-        const {accessedAt} = this
-        return ttl({
-            ...holder,
-            accessedAt,
-            //
-            now,
-            sinceCachedAt: now - holder.cachedAt.getTime(),
-            sinceAccessedAt: accessedAt
-                ? now - accessedAt.getTime()
-                : undefined
-        })
-    }
-
-    private _timeUntilExpire(type: MethodType, holder: Holder<T>): number {
-        const elapsed = new Date().getTime() - holder.cachedAt.getTime()
-        return this._timeToLive(type, holder) - elapsed
-    }
-
-    private _isExpired(type: MethodType, holder: Holder<T>): boolean {
-        return this._timeUntilExpire(type, holder) <= 0
     }
 
     private async _getOrUpdateThenEmit(methodType: MethodType): Promise<T> {
@@ -69,19 +38,22 @@ export class CachedLazyProvider<T> {
         const {accessedAt} = this
         const {cachedObj, cachedAt} = this.cacheHolder!
         this.options.onEvent({
-            cachedObj, cachedAt, accessedAt: accessedAt,
+            cachedObj, cachedAt, accessedAt,
             eventType, methodType, requestAt, responseAt,
         })
         return cachedObj
     }
 
     private async _getOrUpdate(type: MethodType): Promise<EventType> {
-        if (this.cacheHolder && !this._isExpired(type, this.cacheHolder)) {
+        const ttl = type === "get"
+            ? this.options.ttl
+            : this.options.autoUpdater?.ttl ?? this.options.ttl
+        if (isValid({ttl, holder: this.cacheHolder, accessedAt: this.accessedAt})) {
             return "hitA"
         }
         return synchronized(this)(
             async () => {
-                if (this.cacheHolder && !this._isExpired(type, this.cacheHolder)) {
+                if (isValid({ttl, holder: this.cacheHolder, accessedAt: this.accessedAt})) {
                     return "hitS"
                 }
                 // Update Cache
@@ -93,4 +65,42 @@ export class CachedLazyProvider<T> {
             }
         )
     }
+}
+
+
+export function getTimeToLive<T>({now, ttl, holder, accessedAt}: {
+    now?: number // for testing
+    ttl: TTLProvider<T>,
+    holder: Holder<T>,
+    accessedAt?: Date
+}): number {
+    if (typeof ttl === 'number') {
+        return ttl
+    }
+    now = now ?? new Date().getTime()
+    return ttl({
+        ...holder,
+        accessedAt,
+        //
+        now,
+        sinceCachedAt: now - holder.cachedAt.getTime(),
+        sinceAccessedAt: accessedAt
+            ? now - accessedAt.getTime()
+            : undefined
+    })
+}
+
+export function isValid<T>({now, ttl, holder, accessedAt}: {
+    now?: number // for testing
+    ttl: TTLProvider<T>,
+    holder?: Holder<T>,
+    accessedAt?: Date
+}): boolean {
+    if (holder === undefined) {
+        return false
+    }
+    now = now ?? new Date().getTime()
+    const elapsed = now - holder.cachedAt.getTime()
+    const timeUntilExpire = getTimeToLive({now, ttl, holder, accessedAt}) - elapsed
+    return timeUntilExpire > 0
 }
