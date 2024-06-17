@@ -6,6 +6,7 @@
     "build": "npx tsup ./src",
     "test": "jest"
   },
+  "repository": "github:tomohisaota/cached-provider.git",
   "author": "Tomohisa Ota",
   "license": "MIT",
   "devDependencies": {
