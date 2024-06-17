@@ -2,13 +2,13 @@
 
 Optimize data creation by synchronizing and caching
 
-- Check cached object 
-  - If valid cache exist, return cached value (hitA)
+- Check cached object
+    - If valid cache exist, return cached value (hitA)
 - Synchronize execution
-  - Check cached object
-      - If valid cache exist, return cached value (hitS)
-  - Call provider to update cached value
-  - return cached value (miss)
+    - Check cached object
+        - If valid cache exist, return cached value (hitS)
+    - Call provider to update cached value
+    - return cached value (miss)
 
 # How to install
 
@@ -31,6 +31,7 @@ await value() // Access Value
 ```
 
 ## Eager Cache
+
 In addition to lazy caching, run cache update automatically to minimize get latency
 
 ```typescript
@@ -124,13 +125,57 @@ export type CacheEventCallback = (event: CacheEvent) => void
 | hitS | Cache hit after synchronization. Fast        |
 | miss | Cache miss, updated value. Slow              |
 
+# Examples
+```
+% npx ts-node example/example.ts 
+Sample: Lazy Cache
+┌─────────┬────────────┬───────────┬───────┬─────┬─────┬─────┐
+│ (index) │ methodType │ eventType │ count │ min │ avg │ max │
+├─────────┼────────────┼───────────┼───────┼─────┼─────┼─────┤
+│ 0       │ 'get'      │ 'hitA'    │ 38    │ 0   │ 0   │ 1   │
+│ 1       │ 'get'      │ 'hitS'    │ 8     │ 98  │ 150 │ 201 │
+│ 2       │ 'get'      │ 'miss'    │ 4     │ 300 │ 301 │ 302 │
+└─────────┴────────────┴───────────┴───────┴─────┴─────┴─────┘
+Sample: Lazy Cache with warmup
+┌─────────┬────────────┬───────────┬───────┬─────┬─────┬─────┐
+│ (index) │ methodType │ eventType │ count │ min │ avg │ max │
+├─────────┼────────────┼───────────┼───────┼─────┼─────┼─────┤
+│ 0       │ 'get'      │ 'hitA'    │ 40    │ 0   │ 0   │ 1   │
+│ 1       │ 'get'      │ 'hitS'    │ 6     │ 99  │ 150 │ 203 │
+│ 2       │ 'get'      │ 'miss'    │ 3     │ 301 │ 302 │ 303 │
+└─────────┴────────────┴───────────┴───────┴─────┴─────┴─────┘
+Sample: Eager Cache
+┌─────────┬────────────┬───────────┬───────┬─────┬─────┬─────┐
+│ (index) │ methodType │ eventType │ count │ min │ avg │ max │
+├─────────┼────────────┼───────────┼───────┼─────┼─────┼─────┤
+│ 0       │ 'get'      │ 'hitA'    │ 47    │ 0   │ 0   │ 1   │
+│ 1       │ 'get'      │ 'hitS'    │ 2     │ 99  │ 149 │ 198 │
+│ 2       │ 'get'      │ 'miss'    │ 1     │ 301 │ 301 │ 301 │
+│ 3       │ 'update'   │ 'hitA'    │ 30    │ 0   │ 0   │ 1   │
+│ 4       │ 'update'   │ 'hitS'    │ 12    │ 99  │ 150 │ 201 │
+│ 5       │ 'update'   │ 'miss'    │ 5     │ 301 │ 302 │ 302 │
+└─────────┴────────────┴───────────┴───────┴─────┴─────┴─────┘
+Sample: Eager Cache with warmup
+┌─────────┬────────────┬───────────┬───────┬─────┬─────┬─────┐
+│ (index) │ methodType │ eventType │ count │ min │ avg │ max │
+├─────────┼────────────┼───────────┼───────┼─────┼─────┼─────┤
+│ 0       │ 'get'      │ 'hitA'    │ 50    │ 0   │ 0   │ 1   │
+│ 1       │ 'update'   │ 'hitA'    │ 32    │ 0   │ 0   │ 1   │
+│ 2       │ 'update'   │ 'hitS'    │ 15    │ 1   │ 140 │ 201 │
+│ 3       │ 'update'   │ 'miss'    │ 6     │ 300 │ 301 │ 302 │
+└─────────┴────────────┴───────────┴───────┴─────┴─────┴─────┘
+```
+
 # Version History
+
+- 1.0.3
+    - Add unit tests
 - 1.0.2
-  - Update README(typo)
+    - Update README(typo)
 - 1.0.1
-  - Update README
+    - Update README
 - 1.0.0
-  - Initial Release
+    - Initial Release
 
 # License
 

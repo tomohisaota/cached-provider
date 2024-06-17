@@ -102,5 +102,5 @@ export function isValid<T>({now, ttl, holder, accessedAt}: {
     now = now ?? new Date().getTime()
     const elapsed = now - holder.cachedAt.getTime()
     const timeUntilExpire = getTimeToLive({now, ttl, holder, accessedAt}) - elapsed
-    return timeUntilExpire > 0
+    return timeUntilExpire >= 0
 }

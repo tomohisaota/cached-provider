@@ -39,4 +39,8 @@ export class CachedProvider<T> extends CachedLazyProvider<T> {
             this.timer = null
         }
     }
+
+    get isRunning() {
+        return this.timer !== null
+    }
 }
