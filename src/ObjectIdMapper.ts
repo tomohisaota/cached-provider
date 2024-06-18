@@ -11,6 +11,7 @@ export class ObjectIdMapper {
     readonly idDecorator: IdDecorator
 
     protected readonly idMap = new WeakMap<WeakKey, string>();
+    seq = 0
 
     constructor(args?: {
                     idGenerator?: IdGenerator,
@@ -18,7 +19,7 @@ export class ObjectIdMapper {
                 }
     ) {
         this.idGenerator = args?.idGenerator ?? (() => {
-            return crypto.randomUUID()
+            return `seqId<${this.seq++}>`
         })
         this.idDecorator = args?.idDecorator ?? ((_: Object, uniqueId: string) => {
             return uniqueId
