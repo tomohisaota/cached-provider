@@ -168,6 +168,8 @@ Sample: Eager Cache with warmup
 
 # Version History
 
+- 1.0.5
+  - Enhance publish step
 - 1.0.4
   - Use seq based id instead of UUID for object id
 - 1.0.3

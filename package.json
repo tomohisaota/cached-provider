@@ -1,10 +1,11 @@
 {
   "name": "cached-provider",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Optimize data creation by synchronizing and caching",
   "scripts": {
     "build": "npx tsup ./src",
-    "test": "jest"
+    "test": "jest",
+    "publish": "npm run build&&npm publish&&rm -r dist"
   },
   "repository": "github:tomohisaota/cached-provider.git",
   "author": "Tomohisa Ota",
