@@ -5,7 +5,8 @@
   "scripts": {
     "build": "npx tsup ./src",
     "test": "jest",
-    "publish": "npm run build&&npm publish&&rm -r dist"
+    "clean": "rm -r dist",
+    "deploy": "npm run build&&npm publish&&npm run clean"
   },
   "repository": "github:tomohisaota/cached-provider.git",
   "author": "Tomohisa Ota",
