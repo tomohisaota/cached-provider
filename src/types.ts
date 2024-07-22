@@ -25,11 +25,14 @@ export type CacheEvent<T> = {
 }
 
 export type CacheEventCallback<T> = (event: CacheEvent<T>) => void
+export type Validator<T> = (obj: T) => Promise<boolean>
 
 export type CachedProviderOptions<T> = {
     ttl: TTLProvider<T>
     provider: ValueProvider<T>
     onEvent?: CacheEventCallback<T>
+    validator?: Validator<T>
+
     autoUpdater?: {
         interval: number,
         ttl?: TTLProvider<T>

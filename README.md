@@ -68,6 +68,9 @@ const value = cached({
 await value() // Access Value
 ```
 
+## validator callback
+In addition to the time based cache expire, you can add validator callback to validate cache object just before using it
+
 # How to shut down auto updater
 
 If you specify onShouldContinue callback, cached provider ask you if it can continue running auto updater.
@@ -168,6 +171,8 @@ Sample: Eager Cache with warmup
 
 # Version History
 
+- 1.1.0
+  - Add validator callback
 - 1.0.5
   - Enhance publish step
 - 1.0.4

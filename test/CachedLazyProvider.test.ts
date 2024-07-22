@@ -55,7 +55,7 @@ describe("getTimeToLive", () => {
 
 describe("isValid", () => {
     test('without cachedObj', async () => {
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl: 100,
         })).toBeFalsy()
     })
@@ -63,7 +63,7 @@ describe("isValid", () => {
     test('with different timing', async () => {
         const now = new Date().getTime()
         const ttl = 100
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl,
             holder: {
                 cachedObj: 1,
@@ -72,7 +72,7 @@ describe("isValid", () => {
             now
         })).toBeTruthy()
 
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl,
             holder: {
                 cachedObj: 1,
@@ -81,7 +81,7 @@ describe("isValid", () => {
             now
         })).toBeTruthy()
 
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl,
             holder: {
                 cachedObj: 1,
@@ -92,7 +92,7 @@ describe("isValid", () => {
 
         // TTL has passed
 
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl,
             holder: {
                 cachedObj: 1,
@@ -101,11 +101,33 @@ describe("isValid", () => {
             now
         })).toBeFalsy()
 
-        expect(isValid<number>({
+        expect(await isValid<number>({
             ttl,
             holder: {
                 cachedObj: 1,
                 cachedAt: new Date(now - ttl * 2),
+            },
+            now
+        })).toBeFalsy()
+
+        // validator to be true
+        expect(await isValid<number>({
+            ttl,
+            validator: async () => true,
+            holder: {
+                cachedObj: 1,
+                cachedAt: new Date(now - ttl),
+            },
+            now
+        })).toBeTruthy()
+
+        // validator to be false
+        expect(await isValid<number>({
+            ttl,
+            validator: async () => false,
+            holder: {
+                cachedObj: 1,
+                cachedAt: new Date(now - ttl),
             },
             now
         })).toBeFalsy()

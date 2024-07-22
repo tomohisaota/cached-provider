@@ -1,5 +1,5 @@
 import {synchronized} from "./synchronized";
-import {CachedProviderOptions, EventType, MethodType, TTLProvider} from "./types";
+import {CachedProviderOptions, EventType, MethodType, TTLProvider, Validator} from "./types";
 
 type Holder<T> = {
     readonly cachedObj: T
@@ -48,12 +48,20 @@ export class CachedLazyProvider<T> {
         const ttl = type === "get"
             ? this.options.ttl
             : this.options.autoUpdater?.ttl ?? this.options.ttl
-        if (isValid({ttl, holder: this.cacheHolder, accessedAt: this.accessedAt})) {
+        if (await isValid({
+            ttl,
+            holder: this.cacheHolder,
+            accessedAt: this.accessedAt,
+            validator: this.options.validator
+        })) {
             return "hitA"
         }
         return synchronized(this)(
             async () => {
-                if (isValid({ttl, holder: this.cacheHolder, accessedAt: this.accessedAt})) {
+                if (await isValid({
+                    ttl, holder: this.cacheHolder, accessedAt: this.accessedAt,
+                    validator: this.options.validator
+                })) {
                     return "hitS"
                 }
                 // Update Cache
@@ -90,17 +98,24 @@ export function getTimeToLive<T>({now, ttl, holder, accessedAt}: {
     })
 }
 
-export function isValid<T>({now, ttl, holder, accessedAt}: {
+export async function isValid<T>({now, ttl, holder, accessedAt, validator}: {
     now?: number // for testing
     ttl: TTLProvider<T>,
     holder?: Holder<T>,
     accessedAt?: Date
-}): boolean {
+    validator?: Validator<T>
+}): Promise<boolean> {
     if (holder === undefined) {
         return false
     }
     now = now ?? new Date().getTime()
     const elapsed = now - holder.cachedAt.getTime()
     const timeUntilExpire = getTimeToLive({now, ttl, holder, accessedAt}) - elapsed
-    return timeUntilExpire >= 0
+    if (timeUntilExpire < 0) {
+        return false
+    }
+    if (validator) {
+        return await validator(holder.cachedObj)
+    }
+    return true
 }
